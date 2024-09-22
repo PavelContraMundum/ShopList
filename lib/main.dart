@@ -30,6 +30,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   final TextEditingController _storeController = TextEditingController();
   final TextEditingController _itemController = TextEditingController();
   String? _selectedStoreId;
+  bool _showInputFields = false; // Stav pro zobrazení/skrytí inputů
 
   @override
   void initState() {
@@ -190,63 +191,78 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Nákupní lístek'),
+        actions: [
+          IconButton(
+            icon: Icon(_showInputFields ? Icons.visibility_off : Icons.visibility),
+            onPressed: () {
+              setState(() {
+                _showInputFields = !_showInputFields;
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _storeController,
-                    decoration: InputDecoration(
-                      labelText: 'Přidat obchod',
+          if (_showInputFields) ...[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _storeController,
+                      decoration: InputDecoration(
+                        labelText: 'Přidat obchod',
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: _addStore,
-                ),
-              ],
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: _addStore,
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (_stores.isNotEmpty)
-            DropdownButton<String>(
-              hint: Text('Přidat zboží'),
-              value: _selectedStoreId,
-              onChanged: (value) {
-                setState(() {
-                  _selectedStoreId = value;
-                });
-              },
-              items: _stores.map<DropdownMenuItem<String>>((store) {
-                return DropdownMenuItem<String>(
-                  value: store['id'].toString(),
-                  child: Text(store['name']),
-                );
-              }).toList(),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _itemController,
-                    decoration: InputDecoration(
-                      labelText: 'Přidat zboží k vybranému obchodu',
+            if (_stores.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButton<String>(
+                  hint: Text('Vybrat obchod'),
+                  value: _selectedStoreId,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStoreId = value;
+                    });
+                  },
+                  items: _stores.map<DropdownMenuItem<String>>((store) {
+                    return DropdownMenuItem<String>(
+                      value: store['id'].toString(),
+                      child: Text(store['name']),
+                    );
+                  }).toList(),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _itemController,
+                      decoration: InputDecoration(
+                        labelText: 'Přidat zboží k vybranému obchodu',
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: _addItem,
-                ),
-              ],
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: _addItem,
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
           Expanded(
             child: ListView.builder(
               itemCount: _stores.length,
