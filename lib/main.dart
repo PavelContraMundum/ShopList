@@ -10,6 +10,7 @@ class ShoppingListApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: ShoppingListScreen(),
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -81,7 +82,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     for (var store in storeList) {
       final items = await _database!.query('items',
           where: 'store_id = ?', whereArgs: [store['id']]);
-      store['items'] = items;
+      store['items'] = List.from(items); // Kopie seznamu položek
     }
 
     setState(() {
@@ -110,15 +111,19 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         'bought': 0,
         'store_id': int.parse(_selectedStoreId!),
       });
+
+      final storeIndex =
+      _stores.indexWhere((store) => store['id'].toString() == _selectedStoreId);
+
       setState(() {
-        final storeIndex = _stores.indexWhere(
-                (store) => store['id'].toString() == _selectedStoreId);
-        _stores[storeIndex]['items'].add({
-          'id': id,
-          'name': _itemController.text,
-          'bought': 0,
-        });
+        _stores[storeIndex]['items'] = List.from(_stores[storeIndex]['items'])
+          ..add({
+            'id': id,
+            'name': _itemController.text,
+            'bought': 0,
+          });
       });
+
       _itemController.clear();
     }
   }
@@ -135,6 +140,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
 
     setState(() {
+      _stores[storeIndex]['items'] = List.from(_stores[storeIndex]['items']);
       _stores[storeIndex]['items'][itemIndex]['bought'] = updatedBought;
     });
   }
@@ -149,6 +155,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
 
     setState(() {
+      _stores[storeIndex]['items'] = List.from(_stores[storeIndex]['items']);
       _stores[storeIndex]['items'].removeAt(itemIndex);
     });
   }
