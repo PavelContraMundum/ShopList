@@ -140,8 +140,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
 
     setState(() {
-      _stores[storeIndex]['items'] = List.from(_stores[storeIndex]['items']);
-      _stores[storeIndex]['items'][itemIndex]['bought'] = updatedBought;
+      _stores[storeIndex]['items'][itemIndex] = {
+        ...item,
+        'bought': updatedBought,
+      };
     });
   }
 
@@ -190,6 +192,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   @override
   void dispose() {
     _database?.close();
+    _storeController.dispose();
+    _itemController.dispose();
     super.dispose();
   }
 
